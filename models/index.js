@@ -1,6 +1,6 @@
-const Student = require('./Student');
-const Course = require('./Course');
+const Person = require('./person');
+const Thought = require('./thought');
 
-module.exports = { Student, Course };
+module.exports = { Person, Thought };
 
 // deals with what is going to the database
