@@ -2,93 +2,93 @@ const { ObjectId } = require('mongoose').Types;
 const { Person, thought } = require('../models');
 
 // Aggregate function to get the number of students overall
-const headCount = async () => {
-  const numberOfStudents = await Student.aggregate()
-    .count('studentCount');
-  return numberOfStudents;
+const friendCount = async () => {
+  const numberOfFriends = await Person.aggregate()
+    .count('friendCount');
+  return numberOfFriends;
 }
 
 // Aggregate function for getting the overall grade using $avg
-const grade = async (studentId) =>
-  Student.aggregate([
+const profile = async (personId) =>
+  Person.aggregate([
     // only include the given student by using $match
-    { $match: { _id: new ObjectId(studentId) } },
+    { $match: { _id: new ObjectId(personId) } },
     {
       $unwind: '$assignments',
     },
     {
       $group: {
-        _id: new ObjectId(studentId),
-        overallGrade: { $avg: '$assignments.score' },
+        _id: new ObjectId(personId),
+        // overallGrade: { $avg: '$assignments.score' },
       },
     },
   ]);
 
 module.exports = {
-  // Get all students
-  async getStudents(req, res) {
+  // Get all friends
+  async getFriendsList(req, res) {
     try {
-      const students = await Student.find();
+      const friends = await Person.find();
 
-      const studentObj = {
-        students,
-        headCount: await headCount(),
+      const friendObj = {
+        friends,
+        friendCount: await friendCount(),
       };
 
-      res.json(studentObj);
+      res.json(friendObj);
     } catch (err) {
       console.log(err);
       return res.status(500).json(err);
     }
   },
   // Get a single student
-  async getSingleStudent(req, res) {
+  async getSinglePerson(req, res) {
     try {
-      const student = await Student.findOne({ _id: req.params.studentId })
+      const person = await Person.findOne({ _id: req.params.personId })
         .select('-__v');
 
-      if (!student) {
-        return res.status(404).json({ message: 'No student with that ID' })
+      if (!person) {
+        return res.status(404).json({ message: 'No person with that ID' })
       }
 
       res.json({
-        student,
-        grade: await grade(req.params.studentId),
+        person,
+        profile: await profile(req.params.personId),
       });
     } catch (err) {
       console.log(err);
       return res.status(500).json(err);
     }
   },
-  // create a new student
-  async createStudent(req, res) {
+  // create a new user
+  async createPerson(req, res) {
     try {
-      const student = await Student.create(req.body);
-      res.json(student);
+      const person = await Person.create(req.body);
+      res.json(person);
     } catch (err) {
       res.status(500).json(err);
     }
   },
-  // Delete a student and remove them from the course
-  async deleteStudent(req, res) {
+  // Delete a person and remove them from friends lists
+  async deletePerson(req, res) {
     try {
-      const student = await Student.findOneAndRemove({ _id: req.params.studentId });
+      const person = await Person.findOneAndRemove({ _id: req.params.personId });
 
-      if (!student) {
-        return res.status(404).json({ message: 'No such student exists' });
+      if (!person) {
+        return res.status(404).json({ message: 'No such person exists' });
       }
 
-      const course = await Course.findOneAndUpdate(
-        { students: req.params.studentId },
-        { $pull: { students: req.params.studentId } },
-        { new: true }
-      );
+      // const course = await Course.findOneAndUpdate(
+      //   { students: req.params.studentId },
+      //   { $pull: { students: req.params.studentId } },
+      //   { new: true }
+      // );
 
-      if (!course) {
-        return res.status(404).json({
-          message: 'Student deleted, but no courses found',
-        });
-      }
+      // if (!course) {
+      //   return res.status(404).json({
+      //     message: 'Student deleted, but no courses found',
+      //   });
+      // }
 
       res.json({ message: 'Student successfully deleted' });
     } catch (err) {
