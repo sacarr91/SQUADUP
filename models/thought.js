@@ -1,34 +1,34 @@
 const { Schema, model } = require('mongoose');
 
-// Schema to create a course model
 const thoughtSchema = new Schema(
   {
-    shareThought: {
+    thoughtText: {
       type: String,
       required: true,
+      minLength: 1,
+      maxLength: 280,
     },
-    author: {
-      type: Boolean,
-      ref: 'person',
-    },
-    dateCreated: {
+    createdAt: {
       type: Date,
-      default: Date.now(),
+      default: Date.now,
+      },
+    username: {
+      type: String,
+      required: true,
+      ref: 'Person'
     },
     reactions: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: 'interaction',
-      },
-    ],
-  },
-  {
-    toJSON: {
-      virtuals: true,
-    },
-    id: false,
+      { 
+        type: Schema.Types.ObjectId, 
+        ref: 'reaction' 
+      }],
+
   }
 );
+
+thoughtSchema.virtual('reactionCount').get(function () {
+  return this.reactions.length;
+});
 
 const Thought = model('thought', thoughtSchema);
 

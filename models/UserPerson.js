@@ -4,38 +4,34 @@ const assignmentSchema = require('./Assignment');
 // Schema to create Student model
 const personSchema = new Schema(
   {
-    first: {
+    username: {
       type: String,
+      unique: true,
       required: true,
-      max_length: 50,
-    },
-    last: {
-      type: String,
-      required: true,
-      max_length: 50,
+      trim
     },
     email: {
       type: String,
       required: true,
-      max_length: 50,
-    },
-    age: {
-      type: Number,
-      required: true,
-    },
-    friends: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: 'person',
+      unique: true,
+      vaildate: {
+        isEmail: true,
       },
-    ],
-  },
-  {
-    toJSON: {
-      getters: true,
     },
+    thoughts: [{
+      type: Schema.Types.ObjectId,
+      ref: 'Thought'
+    }],
+    friends: [{
+      type: Schema.Types.ObjectId,
+      ref: 'Person'
+    }]
   }
 );
+
+personSchema.virtual('friendCount').get(function () {
+  return this.friends.length;
+});
 
 const Person = model('person', personSchema);
 
